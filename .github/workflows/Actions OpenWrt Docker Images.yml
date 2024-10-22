@@ -119,7 +119,7 @@ jobs:
           chmod +x files/etc/rc.local
 
       - name: Build RootFS (amd64)
-        if: env.DOCKER_EXTERA_TAG == 'amd64'
+        #if: env.DOCKER_EXTERA_TAG == 'amd64'
         run: |
           cd immortalwrt-imagebuilder-$DEVICE_VERSION-$DEVICE_TARGET-$DEVICE_SUBTARGET.Linux-x86_64
           chmod +x $GITHUB_WORKSPACE/scripts/*
