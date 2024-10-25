@@ -79,12 +79,6 @@ jobs:
 
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v2
-
-      - name: Docker Login
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PWD }}
  
       - name: Login To Aliyun
         uses: docker/login-action@v2
@@ -118,8 +112,7 @@ jobs:
           cp -rf $GITHUB_WORKSPACE/files .
           chmod +x files/etc/rc.local
 
-      - name: Build RootFS (amd64)
-        if: env.DOCKER_EXTERA_TAG == 'amd64'
+      - name: Build RootFS ${{env.DEVICE_PLATFORM}}
         run: |
           cd immortalwrt-imagebuilder-$DEVICE_VERSION-$DEVICE_TARGET-$DEVICE_SUBTARGET.Linux-x86_64
           chmod +x $GITHUB_WORKSPACE/scripts/*
@@ -133,8 +126,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           rm -rf openwrt-imagebuilder*
 
-      - name: Build & Push Image (amd64)
-        if: env.DOCKER_EXTERA_TAG == 'amd64'
+      - name: Build & Push Image ${{env.DEVICE_PLATFORM}}
         uses: docker/build-push-action@v4
         with:
           platforms: ${{ env.DOCKER_IMAGE_ARCH }}
@@ -142,17 +134,14 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/openwrt:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/openwrt:${{ env.DEVICE_PLATFORM }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/openwrt:${{ env.DOCKER_EXTERA_TAG }}
             registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACES }}/openwrt:latest
             registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACES }}/openwrt:${{ env.DEVICE_PLATFORM }}
             registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACES }}/openwrt:${{ env.DOCKER_EXTERA_TAG }}
             
       - name: Save Image
         run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/openwrt:latest
-          docker save -o openwrt.tar ${{ secrets.DOCKERHUB_USERNAME }}/openwrt:latest
+          docker pull registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACES }}/openwrt:latest
+          docker save -o registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACES }}/openwrt:latest
 
       - name: Upload Image
         uses: actions/upload-artifact@v3
